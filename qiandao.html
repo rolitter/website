@@ -63,7 +63,7 @@
 
     .bookmarks-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
     }
 
@@ -147,10 +147,59 @@
       }
 
       .bookmarks-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 12px;
       }
 
+      .search-container {
+        max-width: 100%;
+        padding: 0 12px;
+      }
+
+
+    /* 更小的移动端适配，单列显示，减小间距与字号 */
+    @media (max-width: 480px) {
+      #app {
+        padding: 20px 10px;
+      }
+
+      .page-title {
+        font-size: 1.4rem;
+        margin-bottom: 18px;
+      }
+
+      .filter-container {
+        gap: 8px;
+        padding: 0 6px;
+      }
+
+      .search-container {
+        max-width: 100%;
+        margin: 0 0 16px;
+        padding: 0 6px;
+      }
+
+      .bookmarks-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .bookmark-card {
+        width: calc(50% - 30px);
+        box-sizing: border-box;
+        padding: 12px;
+        border-radius: 10px;
+      }
+
+      .bookmark-title {
+        font-size: 0.95rem;
+      }
+
+      .bookmark-url {
+        font-size: 0.75rem;
+      }
+    }
       .bookmark-card {
         padding: 15px;
       }
