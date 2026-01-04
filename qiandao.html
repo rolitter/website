@@ -236,7 +236,11 @@
       <!-- 书签列表 -->
       <div class="bookmarks-grid" v-if="filteredList.length > 0">
         <el-tooltip v-for="(item, index) in filteredList" :key="index" :content="item.url" placement="top">
-          <div class="bookmark-card" @click="openLink(item.url)" @touchend.prevent="handleTouch($event, item.url)">
+          <div class="bookmark-card"
+               @click="handleClick(item.url)"
+               @touchstart="handleTouchStart"
+               @touchmove="handleTouchMove"
+               @touchend="handleTouchEnd($event, item.url)">
             <div class="bookmark-header">
               <div class="bookmark-type">
                 <el-tag size="small" effect="dark" :type="item.type === 'qiandao' ? 'danger' : 'primary'">
@@ -301,7 +305,12 @@
         type: 'qiandao',
       },
       {
-        title: '随时跑路公益',
+        title: 'api-随时跑路公益',
+        url: 'https://runanytime.hxi.me/app/dashboard',
+        type: 'qiandao',
+      },
+      {
+        title: '转盘-随时跑路公益',
         url: 'https://fuli.hxi.me/',
         type: 'qiandao',
       },
@@ -312,12 +321,22 @@
       },
       {
         title: 'Huan API',
-        url: 'https://ai.huan666.de/app/me',
+        url: 'https://ai.huan666.de/console/personal',
         type: 'qiandao',
       },
       {
         title: '莹wpgzs',
         url: 'https://quota.wpgzs.top/#slot',
+        type: 'qiandao',
+      },
+      {
+        title: '小呆api',
+        url: 'https://api.daiju.live/console/personal',
+        type: 'qiandao',
+      },
+      {
+        title: '小呆api-市场',
+        url: 'https://game.daiju.live/market',
         type: 'qiandao',
       }
     ];
@@ -332,6 +351,13 @@
       setup() {
         const searchKeyword = ref('');
         const selectedType = ref('qiandao'); // 默认选中 qiandao
+        
+        // 触摸事件相关变量
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchStartTime = 0;
+        let isScrolling = false;
+        let isTouchDevice = false;
 
         // 获取类型标签
         const getTypeLabel = (type) => {
@@ -370,10 +396,56 @@
           window.open(url.trim(), '_blank');
         };
 
-        // 处理移动端触摸事件
-        const handleTouch = (event, url) => {
-          event.preventDefault();
-          openLink(url);
+        // 处理点击事件（仅在非触摸设备上触发）
+        const handleClick = (url) => {
+          // 如果是触摸设备，不处理click事件，避免重复触发
+          if (!isTouchDevice) {
+            openLink(url);
+          }
+        };
+
+        // 处理触摸开始
+        const handleTouchStart = (event) => {
+          isTouchDevice = true;
+          isScrolling = false;
+          const touch = event.touches[0];
+          touchStartX = touch.clientX;
+          touchStartY = touch.clientY;
+          touchStartTime = Date.now();
+        };
+
+        // 处理触摸移动
+        const handleTouchMove = (event) => {
+          if (!touchStartX || !touchStartY) {
+            return;
+          }
+
+          const touch = event.touches[0];
+          const deltaX = Math.abs(touch.clientX - touchStartX);
+          const deltaY = Math.abs(touch.clientY - touchStartY);
+
+          // 如果移动距离超过10像素，认为是滚动
+          if (deltaX > 10 || deltaY > 10) {
+            isScrolling = true;
+          }
+        };
+
+        // 处理触摸结束
+        const handleTouchEnd = (event, url) => {
+          const touchEndTime = Date.now();
+          const touchDuration = touchEndTime - touchStartTime;
+
+          // 只有在非滚动状态、触摸时间小于500ms时才触发点击
+          if (!isScrolling && touchDuration < 500) {
+            event.preventDefault();
+            openLink(url);
+          }
+
+          // 重置状态
+          touchStartX = 0;
+          touchStartY = 0;
+          touchStartTime = 0;
+          isScrolling = false;
         };
 
         return {
@@ -385,7 +457,10 @@
           getTypeLabel,
           getTypeCount,
           openLink,
-          handleTouch,
+          handleClick,
+          handleTouchStart,
+          handleTouchMove,
+          handleTouchEnd,
           Search: ElementPlusIconsVue.Search
         };
       }
